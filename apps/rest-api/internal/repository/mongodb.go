@@ -8,22 +8,12 @@ import (
 	"rest-api/internal/models"
 
 	"go.mongodb.org/mongo-driver/bson"
-<<<<<<< HEAD
-=======
 	"go.mongodb.org/mongo-driver/bson/primitive"
->>>>>>> ca4a909 (Add backend implementation with chat, auth, and fitness features)
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MongoDBRepository struct {
-<<<<<<< HEAD
-	chatCollection    *mongo.Collection
-	workoutCollection *mongo.Collection
-}
-
-func NewMongoDBRepository(uri, dbName string) (MongoDBRep, error) {
-=======
 	chatCollection       *mongo.Collection
 	workoutCollection    *mongo.Collection
 	completionCollection *mongo.Collection
@@ -32,7 +22,6 @@ func NewMongoDBRepository(uri, dbName string) (MongoDBRep, error) {
 
 func NewMongoDBRepository(uri, dbName string) (MongoDBRep, error) {
 	fmt.Printf("Connecting to MongoDB with URI: %s, DB: %s\n", uri, dbName)
->>>>>>> ca4a909 (Add backend implementation with chat, auth, and fitness features)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -41,12 +30,6 @@ func NewMongoDBRepository(uri, dbName string) (MongoDBRep, error) {
 		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
 
-<<<<<<< HEAD
-	db := client.Database(dbName)
-	return &MongoDBRepository{
-		chatCollection:    db.Collection("chat_messages"),
-		workoutCollection: db.Collection("workout_plans"),
-=======
 	// Test the connection
 	if err := client.Ping(ctx, nil); err != nil {
 		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
@@ -59,7 +42,6 @@ func NewMongoDBRepository(uri, dbName string) (MongoDBRep, error) {
 		workoutCollection:    db.Collection("workout_plans"),
 		completionCollection: db.Collection("workout_completions"),
 		progressCollection:   db.Collection("user_progress"),
->>>>>>> ca4a909 (Add backend implementation with chat, auth, and fitness features)
 	}, nil
 }
 
@@ -106,8 +88,6 @@ func (m *MongoDBRepository) GetWorkoutPlan(ctx context.Context, userID int) (*mo
 	}
 	return &plan, err
 }
-<<<<<<< HEAD
-=======
 
 func (m *MongoDBRepository) GetWorkoutByID(ctx context.Context, userID int, workoutID string) (*models.Workout, error) {
 	var plan models.WorkoutPlan
@@ -278,4 +258,3 @@ func (m *MongoDBRepository) calculateLevel(totalWorkouts int) string {
 	}
 	return "Beginner"
 }
->>>>>>> ca4a909 (Add backend implementation with chat, auth, and fitness features)

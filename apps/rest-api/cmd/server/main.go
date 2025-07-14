@@ -75,11 +75,8 @@ func main() {
 		authRouter.HandleFunc("/generate-plan", h.GeneratePlan).Methods("POST")
 		authRouter.HandleFunc("/workout-plan", h.GetWorkoutPlan).Methods("GET")
 		authRouter.HandleFunc("/regenerate-plan", h.RegenerateWorkoutPlan).Methods("POST")
-<<<<<<< HEAD
-=======
 		authRouter.HandleFunc("/complete-workout", h.CompleteWorkout).Methods("POST")
 		authRouter.HandleFunc("/progress", h.GetUserProgress).Methods("GET")
->>>>>>> ca4a909 (Add backend implementation with chat, auth, and fitness features)
 	}
 
 	// Start server
