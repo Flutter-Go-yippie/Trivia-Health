@@ -451,8 +451,6 @@ func (s *AIService) RegenerateWorkoutPlan(ctx context.Context, userComments stri
 	return updatedPlan, nil
 }
 
-<<<<<<< HEAD
-=======
 func (s *AIService) GetWorkoutByID(ctx context.Context, workoutID string) (*models.Workout, error) {
 	userID, err := s.GetUserIDFromContext(ctx)
 	if err != nil {
@@ -496,7 +494,6 @@ func (s *AIService) GetUserProgress(ctx context.Context) (*models.UserProgress, 
 	return s.MongoDBRepo.GetUserProgress(ctx, userID)
 }
 
->>>>>>> ca4a909 (Add backend implementation with chat, auth, and fitness features)
 func (s *AIService) formatRegeneratePrompt(profile *models.FitnessProfile, currentPlan *models.WorkoutPlan, userComments string) string {
 	var sb strings.Builder
 

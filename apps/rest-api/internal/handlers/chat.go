@@ -36,8 +36,6 @@ func (h *Handlers) GetChatHistory(w http.ResponseWriter, r *http.Request) {
 		Messages: history,
 	})
 }
-<<<<<<< HEAD
-=======
 
 func (h *Handlers) CompleteWorkout(w http.ResponseWriter, r *http.Request) {
 	var req models.CompleteWorkoutRequest
@@ -63,4 +61,3 @@ func (h *Handlers) GetUserProgress(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, progress)
 }
->>>>>>> ca4a909 (Add backend implementation with chat, auth, and fitness features)
