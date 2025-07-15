@@ -87,6 +87,7 @@ class DioClient {
   Dio get dio => _dio;
 
   void setToken(String token) {
+    if (kDebugMode) print('Added token $token');
     _token = token;
   }
 
