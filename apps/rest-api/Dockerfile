@@ -1,15 +1,10 @@
-FROM golang:1.23-alpine AS build
-RUN apk add --no-cache make git bash
-
+FROM golang:1.20-alpine AS build
 WORKDIR /app
 COPY . .
-RUN go mod tidy
-RUN go mod download
-RUN make build
+RUN go build -o rest-api
 
 FROM alpine
 WORKDIR /app
-COPY --from=build /app/migrations ./migrations
-COPY --from=build /app/bin/fitness-ai ./rest-api
-EXPOSE 80
-CMD [ "./rest-api" ]
+COPY --from=build /app/rest-api .
+EXPOSE 8080
+CMD ["./rest-api"]
