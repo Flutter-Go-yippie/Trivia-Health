@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"rest-api/internal/models"
-
 	"github.com/go-playground/validator/v10"
+	"rest-api/internal/models"
 )
 
 var validate = validator.New()

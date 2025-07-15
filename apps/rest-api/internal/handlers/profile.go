@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
+	"encoding/json"
 
 	"rest-api/internal/middleware"
 	"rest-api/internal/models"
