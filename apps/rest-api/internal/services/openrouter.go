@@ -14,7 +14,7 @@ import (
 const (
 	openRouterBaseURL = "https://openrouter.ai/api/v1"
 	referer           = "http://localhost"
-	siteTitle         = "NeuroCoach"
+	siteTitle         = "TriviaHealth"
 )
 
 // List of available models with priorities

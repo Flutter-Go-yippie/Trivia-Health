@@ -1,3 +1,12 @@
+// @title TriviaHealth API
+// @version 1.0
+// @description REST API for the TriviaHealth fitness application
+// @host localhost:8080
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Bearer token authentication. Format: Bearer {token}
 package main
 
 import (
@@ -14,7 +23,9 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 
+	_ "rest-api/docs"
 	"rest-api/internal/config"
 	"rest-api/internal/handlers"
 	"rest-api/internal/middleware"
@@ -60,6 +71,9 @@ func main() {
 
 	// Middleware
 	r.Use(middleware.LoggingMiddleware)
+
+	// Swagger documentation
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	// Public routes
 	r.HandleFunc("/health", h.HealthCheck).Methods("GET")
