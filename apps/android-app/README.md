@@ -1,4 +1,4 @@
-# NeuroCoach Android app
+# TriviaHealth Android app
 
 ## Getting Started
 
