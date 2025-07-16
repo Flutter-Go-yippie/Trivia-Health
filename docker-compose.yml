@@ -1,0 +1,50 @@
+services:
+  rest_api:
+    build: ./apps/rest-api
+    environment:
+      - MONGOURI=mongodb://neurocoach-mongo:27017/fitness_ai
+      - DATABASE_URL=postgres://postgres:postgres@fitness-ai-db:5432/fitness_ai?sslmode=disable
+      - OPENROUTER_KEY=${OPENROUTER_KEY}
+      - PORT=80
+    depends_on:
+      - mongo
+      - postgres
+    networks:
+      - internal
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    container_name: rest-api
+  
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fitness_ai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: unless-stopped
+    container_name: fitness-ai-db
+  
+  mongo:
+    image: mongo:4.4
+    environment:
+      - MONGO_INITDB_DATABASE=fitness_ai
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - internal
+    restart: unless-stopped
+    container_name: neurocoach-mongo
+
+volumes:
+  postgres_data:
+  mongo_data:
+
+networks:
+  internal:
+    internal: true
