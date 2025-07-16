@@ -1,7 +1,5 @@
 node_modules/
-dist/
-.env
-*.log
-/apps/*/go.sum
-/apps/*/rest-api
-/apps/*/ws-api
+ dist/
+ .env
+ *.log
+ /apps/*/rest-api
