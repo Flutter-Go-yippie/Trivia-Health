@@ -13,8 +13,8 @@ class LoginNetworkRepository extends LoginRepository {
 
     if (response.statusCode == 200) {
       final data = response.data;
-      NetworkService().setToken(data['token']);
-      return data['token'];
+      NetworkService().setToken(data['access_token']);
+      return data['access_token'];
     } else {
       if (kDebugMode) print(response.data['message']);
     }
@@ -44,8 +44,8 @@ class LoginNetworkRepository extends LoginRepository {
 
     if (response.statusCode == 201) {
       final data = response.data;
-      if (kDebugMode) print('Got token while signing up: ${data['token']}');
-      NetworkService().setToken(data['token']);
+      if (kDebugMode) print('Got token while signing up: ${data['access_token']}');
+      NetworkService().setToken(data['access_token']);
       final addDataResponse = await NetworkService().request(
         method: 'POST',
         path: '/api/profile',
@@ -62,7 +62,7 @@ class LoginNetworkRepository extends LoginRepository {
       );
 
       if (addDataResponse.statusCode == 200) {
-        return data['token'];
+        return data['access_token'];
       }
     }
 
