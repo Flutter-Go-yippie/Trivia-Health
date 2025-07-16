@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
-  SignUpBloc() : super(const SignUpStateInitial()) {
+  SignUpBloc() : super(const SignUpStateInitial(0)) {
     on<SignUpEvent>(
       (event, emit) => switch (event) {
         SignUpEventStartSignup() => _onStartSignup(event, emit),
@@ -18,22 +18,26 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
           emit,
         ),
 
+        SignUpEventGetHealthIssues() => _onGetHealthIssues(event, emit),
+
         SignUpEventFinish() => _onFinish(event, emit),
+
+        SignUpEventReset() => _onReset(event, emit), //Reset if error
       },
     );
   }
 
   void _onStartSignup(SignUpEventStartSignup event, Emitter<SignUpState> emit) {
     if (kDebugMode) print('Got ${event.runtimeType} event');
-    email = event.email;
-    password = event.password;
-    emit(const SignUpStateGetAge());
+    registrationStep++;
+    emit(SignUpStateGetAge(registrationStep));
   }
 
   void _onGetAge(SignUpEventGetAge event, Emitter<SignUpState> emit) {
     if (kDebugMode) print('Got ${event.runtimeType} event');
     age = event.age;
-    emit(const SignUpStateGetHeightWeight());
+    registrationStep++;
+    emit(SignUpStateGetHeightWeight(registrationStep));
   }
 
   void _onGetHeightWeight(
@@ -43,7 +47,8 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     if (kDebugMode) print('Got ${event.runtimeType} event');
     height = event.height;
     weight = event.weight;
-    emit(const SignUpStateGetGoalTimeframe());
+    registrationStep++;
+    emit(SignUpStateGetGoalTimeframe(registrationStep));
   }
 
   void _onGetGoalTimeframe(
@@ -53,7 +58,8 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     if (kDebugMode) print('Got ${event.runtimeType} event');
     goal = event.goal;
     timeframe = event.timeframe;
-    emit(const SignUpStateGetLevelAvailableTime());
+    registrationStep++;
+    emit(SignUpStateGetLevelAvailableTime(registrationStep));
   }
 
   void _onGetLevelAvailableTime(
@@ -63,26 +69,42 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     if (kDebugMode) print('Got ${event.runtimeType} event');
     level = event.level;
     minutes = event.availableTime;
-    emit(const SignUpStateGetHealthIssues());
+    registrationStep++;
+    emit(SignUpStateGetHealthIssues(registrationStep));
   }
+
+  void _onGetHealthIssues(SignUpEventGetHealthIssues event, Emitter<SignUpState> emit) {
+    if (kDebugMode) print('Got ${event.runtimeType} event');
+    healthIssues = event.healthIssues;
+    registrationStep++;
+    emit(SignUpStateGetCredentials(registrationStep));
+  }
+
 
   void _onFinish(SignUpEventFinish event, Emitter<SignUpState> emit) {
     if (kDebugMode) print('Got ${event.runtimeType} event');
-    healthIssues = event.healthIssues;
+    email = event.email;
+    password = event.password;
     emit(
       SignUpStateFinish(
-        email!,
-        password!,
-        age!,
-        height!,
-        weight!,
-        goal!,
-        timeframe!,
-        level!,
-        minutes!,
-        healthIssues,
+          email!,
+          password!,
+          age!,
+          height!,
+          weight!,
+          goal!,
+          timeframe!,
+          level!,
+          minutes!,
+          healthIssues,
+          registrationStep
       ),
     );
+  }
+
+  void _onReset(SignUpEventReset event, Emitter<SignUpState> emit) {
+    registrationStep = 0;
+    emit(SignUpStateInitial(registrationStep));
   }
 
   String? email;
@@ -95,17 +117,19 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   String? level;
   int? minutes;
   List<String> healthIssues = [];
+  int registrationStep = 0;
 }
 
 sealed class SignUpEvent {
   const SignUpEvent();
 }
 
-class SignUpEventStartSignup extends SignUpEvent {
-  const SignUpEventStartSignup(this.email, this.password);
+class SignUpEventReset extends SignUpEvent {
+  const SignUpEventReset();
+}
 
-  final String email;
-  final String password;
+class SignUpEventStartSignup extends SignUpEvent {
+  const SignUpEventStartSignup();
 }
 
 class SignUpEventGetAge extends SignUpEvent {
@@ -135,39 +159,52 @@ class SignUpEventGetLevelAvailableTime extends SignUpEvent {
   final int availableTime;
 }
 
-class SignUpEventFinish extends SignUpEvent {
-  const SignUpEventFinish(this.healthIssues);
-
+class SignUpEventGetHealthIssues extends SignUpEvent {
+  SignUpEventGetHealthIssues(this.healthIssues);
   final List<String> healthIssues;
 }
 
+class SignUpEventFinish extends SignUpEvent {
+  const SignUpEventFinish(this.email, this.password);
+
+  final String email;
+  final String password;
+}
+
 sealed class SignUpState {
-  const SignUpState();
+  const SignUpState(this.step);
+
+  final int step;
 }
 
 class SignUpStateInitial extends SignUpState {
-  const SignUpStateInitial();
+  const SignUpStateInitial(super.step);
 }
 
 class SignUpStateGetAge extends SignUpState {
-  const SignUpStateGetAge();
+  const SignUpStateGetAge(super.step);
 }
 
 class SignUpStateGetHeightWeight extends SignUpState {
-  const SignUpStateGetHeightWeight();
+  const SignUpStateGetHeightWeight(super.step);
 }
 
 class SignUpStateGetGoalTimeframe extends SignUpState {
-  const SignUpStateGetGoalTimeframe();
+  const SignUpStateGetGoalTimeframe(super.step);
 }
 
 class SignUpStateGetLevelAvailableTime extends SignUpState {
-  const SignUpStateGetLevelAvailableTime();
+  const SignUpStateGetLevelAvailableTime(super.step);
 }
 
 class SignUpStateGetHealthIssues extends SignUpState {
-  const SignUpStateGetHealthIssues();
+  const SignUpStateGetHealthIssues(super.step);
 }
+
+class SignUpStateGetCredentials extends SignUpState {
+  const SignUpStateGetCredentials(super.step);
+}
+
 
 class SignUpStateFinish extends SignUpState {
   const SignUpStateFinish(
@@ -181,6 +218,7 @@ class SignUpStateFinish extends SignUpState {
     this.level,
     this.minutes,
     this.healthIssues,
+    super.step,
   );
 
   final String email;

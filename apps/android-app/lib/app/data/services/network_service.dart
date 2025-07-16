@@ -45,9 +45,9 @@ class DioClient {
   DioClient._internal()
     : _dio = Dio(
         BaseOptions(
-          baseUrl: 'https://api.blazz1t.online:8443',
+          baseUrl: AppVariables.baseUrl,
           connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 60),
           contentType: 'application/json',
         ),
       ) {
@@ -87,6 +87,7 @@ class DioClient {
   Dio get dio => _dio;
 
   void setToken(String token) {
+    if (kDebugMode) print('Added token $token');
     _token = token;
   }
 
