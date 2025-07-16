@@ -82,16 +82,16 @@ class WorkoutPath extends StatelessWidget {
     final current = workouts[index];
     final status = current.status;
 
-    if (status == 'complete') return WorkoutStatus.completed;
+    if (status == 'done') return WorkoutStatus.completed;
 
     final prevCompleted = workouts
         .sublist(0, index)
-        .where((w) => w.status == 'complete')
+        .where((w) => w.status == 'done')
         .isNotEmpty;
 
     final hasPreviousPlanned = workouts
         .sublist(0, index)
-        .any((w) => w.status == 'planned');
+        .any((w) => w.status == 'planned' || w.status == 'expired');
 
     if ((!hasPreviousPlanned && prevCompleted) ||
         (index == 0 &&
@@ -157,7 +157,14 @@ class WorkoutPath extends StatelessWidget {
           node = GestureDetector(
             onTap: () {
               context.pushRoute(
-                WorkoutRoute(name: workout.name, exercises: workout.exercises),
+                WorkoutRoute(
+                  name: workout.name,
+                  exercises: workout.exercises,
+                  isCurrentTraining:
+                      workout.status == 'planned' ||
+                      workout.status == 'expired',
+                  workoutId: workout.workoutId,
+                ),
               );
             },
             child: node,
