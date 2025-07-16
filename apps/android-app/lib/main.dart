@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            scaffoldBackgroundColor: AppColors.black.withAlpha(95),
+            scaffoldBackgroundColor: AppColors.black,
             appBarTheme: AppBarTheme(
               backgroundColor: AppColors.black,
               iconTheme: IconThemeData(
@@ -61,7 +61,6 @@ class MyApp extends StatelessWidget {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (kDebugMode) print(Directory.current.path);
   // await dotenv.load(fileName: '/home/blazz1t/Projects/NeuroCoach/apps/android-app/.env');
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (kDebugMode) print(prefs.getString('jwt'));
