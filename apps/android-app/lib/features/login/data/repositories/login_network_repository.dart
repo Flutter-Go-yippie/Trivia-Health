@@ -13,8 +13,8 @@ class LoginNetworkRepository extends LoginRepository {
 
     if (response.statusCode == 200) {
       final data = response.data;
-      NetworkService().setToken(data['access_token']);
-      return data['access_token'];
+      NetworkService().setToken(data['token']);
+      return data['token'];
     } else {
       if (kDebugMode) print(response.data['message']);
     }
@@ -62,7 +62,7 @@ class LoginNetworkRepository extends LoginRepository {
       );
 
       if (addDataResponse.statusCode == 200) {
-        return data['access_token'];
+        return data['token'];
       }
     }
 
