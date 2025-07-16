@@ -1,12 +1,3 @@
-// @title NeuroCoach API
-// @version 1.0
-// @description REST API for the NeuroCoach fitness application
-// @host localhost:8080
-// @BasePath /
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @description Bearer token authentication. Format: Bearer {token}
 package main
 
 import (
@@ -21,12 +12,9 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/mux"
-	httpSwagger "github.com/swaggo/http-swagger"
 
-	_ "rest-api/docs"
 	"rest-api/internal/config"
 	"rest-api/internal/handlers"
 	"rest-api/internal/middleware"
@@ -58,13 +46,14 @@ func main() {
 	}
 
 	// Initialize services
-	authService := services.NewAuthService(postgresRepo, cfg.JWTSecret, cfg.JWTExpiration)
+	authService := services.NewAuthService(postgresRepo, cfg.JWTSecret, cfg.JWTExpiration, cfg.RefreshExpiration)
 	profileService := services.NewProfileService(postgresRepo)
 	aiService := services.NewAIService(postgresRepo, mongoRepo, cfg.OpenRouterKey)
 	healthService := services.NewHealthService(postgresRepo)
+	mediaService := services.NewMediaService(postgresRepo, mongoRepo)
 
 	// Initialize handlers
-	h := handlers.NewHandlers(authService, profileService, aiService, healthService)
+	h := handlers.NewHandlers(authService, profileService, aiService, healthService, mediaService)
 
 	// Setup router
 	r := mux.NewRouter()
@@ -72,13 +61,11 @@ func main() {
 	// Middleware
 	r.Use(middleware.LoggingMiddleware)
 
-	// Swagger documentation
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
-
 	// Public routes
 	r.HandleFunc("/health", h.HealthCheck).Methods("GET")
 	r.HandleFunc("/register", h.Register).Methods("POST")
 	r.HandleFunc("/login", h.Login).Methods("POST")
+	r.HandleFunc("/refresh", h.RefreshToken).Methods("POST")
 
 	// Authenticated routes
 	authRouter := r.PathPrefix("/api").Subrouter()
@@ -93,6 +80,11 @@ func main() {
 		authRouter.HandleFunc("/regenerate-plan", h.RegenerateWorkoutPlan).Methods("POST")
 		authRouter.HandleFunc("/complete-workout", h.CompleteWorkout).Methods("POST")
 		authRouter.HandleFunc("/progress", h.GetUserProgress).Methods("GET")
+
+		// Exercise media routes
+		authRouter.HandleFunc("/exercise/{exercise_id}/media", h.GetExerciseMedia).Methods("GET")
+		authRouter.HandleFunc("/exercise/media", h.SaveExerciseMedia).Methods("POST")
+		authRouter.HandleFunc("/exercise/media/{media_id}", h.DeleteExerciseMedia).Methods("DELETE")
 		authRouter.HandleFunc("/rating", h.GetRating).Methods("GET")
 		authRouter.HandleFunc("/motivation", h.GetMotivationalMessage).Methods("GET")
 	}
