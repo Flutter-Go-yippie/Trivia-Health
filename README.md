@@ -81,12 +81,11 @@ TriviaHealth is an AI-powered fitness application that provides personalized wor
 
 ### Technical requirements (20 points)
 #### Backend development (8 points)
-- [ ] RESTful API with comprehensive Swagger documentation (2 points)
+- [ ] Go-based backend (3 points)
+- [ ] RESTful API with Swagger documentation (2 point)
 - [ ] PostgreSQL database with proper schema design (1 point)
 - [ ] JWT-based authentication and authorization (1 point)
 - [ ] Comprehensive unit and integration tests (1 point)
-- [ ] AI service integration with external APIs (2 points)
-- [ ] Proper error handling and logging (1 point)
 
 #### Frontend development (8 points)
 - [ ] Flutter-based cross-platform application (mobile + web) (3 points)
