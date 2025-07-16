@@ -122,6 +122,7 @@ IMPORTANT: Create EXACTLY %d different workouts in the workouts array.`, workout
 	// Call AI with structured response requirement
 	content, err := s.Client.CreateChatCompletion(ctx, messages, true)
 	if err != nil {
+		fmt.Printf("AI REQUEST FAILED during generate plan due to: %s", err)
 		return nil, NewServiceError(
 			http.StatusInternalServerError,
 			"AI request failed",
@@ -158,7 +159,7 @@ IMPORTANT: Create EXACTLY %d different workouts in the workouts array.`, workout
 		)
 	}
 
-	// Заполняем отсутствующие поля значениями по умолчанию
+	// Fill missing fields with default values
 	for i := range generatedData.Workouts {
 		if generatedData.Workouts[i].Status == "" {
 			generatedData.Workouts[i].Status = "planned"
@@ -277,7 +278,7 @@ func (s *AIService) Chat(ctx context.Context, message string) (string, error) {
 	// Call AI
 	response, err := s.Client.CreateChatCompletion(ctx, messages, false)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("ERROR: AI REQUEST FAILED in Chat: %v\n", err)
 		return "", NewServiceError(
 			http.StatusInternalServerError,
 			"AI request failed",
@@ -406,7 +407,11 @@ func (s *AIService) fixJSONWithAI(ctx context.Context, content, errorMsg string)
 		{Role: "system", Content: "Fix this JSON to be valid. Return only the corrected JSON without any additional comments."},
 		{Role: "user", Content: fmt.Sprintf("Error: %s\nJSON: %s\nFix this JSON", errorMsg, content)},
 	}
-	return s.Client.CreateChatCompletion(ctx, messages, false)
+	response, err := s.Client.CreateChatCompletion(ctx, messages, false)
+	if err != nil {
+		fmt.Printf("ERROR: AI request failed in fixJSONWithAI: %v\n", err)
+	}
+	return response, err
 }
 
 func (s *AIService) createFallbackWorkouts(count int) []models.Workout {
@@ -505,7 +510,7 @@ func (s *AIService) RegenerateWorkoutPlan(ctx context.Context, userComments stri
 		)
 	}
 
-	// Получаем короткий план для контекста
+	// Get short plan for context
 	currentShortPlan, err := s.MongoDBRepo.GetShortPlan(ctx, userID)
 	if err != nil {
 		return nil, NewServiceError(
@@ -515,7 +520,7 @@ func (s *AIService) RegenerateWorkoutPlan(ctx context.Context, userComments stri
 		)
 	}
 
-	// Получаем профиль пользователя
+	// Get user profile
 	profile, err := s.Repo.GetFitnessProfile(ctx, userID)
 	if err != nil {
 		return nil, NewServiceError(
@@ -534,7 +539,7 @@ func (s *AIService) RegenerateWorkoutPlan(ctx context.Context, userComments stri
 		workoutsPerWeek = 6
 	}
 
-	// Подготавливаем системное сообщение
+	// Prepare system message
 	systemContent := fmt.Sprintf(`You are a fitness expert. You MUST follow user feedback exactly. Create EXACTLY %d workouts and respond with ONLY valid JSON.
 
 CRITICAL: User feedback in the prompt is MANDATORY and must be implemented precisely. Do not ignore any user requirements.
@@ -564,7 +569,7 @@ JSON structure:
 
 IMPORTANT: Create EXACTLY %d different workouts. Follow ALL user requirements from the prompt.`, workoutsPerWeek, workoutsPerWeek)
 
-	// Подготавливаем промпт с коротким планом и комментариями
+	// Prepare prompt with short plan and comments
 	if currentShortPlan == nil {
 		currentShortPlan = &models.ShortWorkoutPlan{
 			UserID:          userID,
@@ -579,17 +584,17 @@ IMPORTANT: Create EXACTLY %d different workouts. Follow ALL user requirements fr
 	}
 	userPrompt := s.formatRegeneratePrompt(profile, currentShortPlan, userComments, workoutsPerWeek)
 
-	// Подготавливаем сообщения для OpenRouter
+	// Prepare messages for OpenRouter
 	messages := []OpenRouterMessage{
 		{Role: "system", Content: systemContent},
 		{Role: "user", Content: userPrompt},
 	}
 
-	// Вызываем ИИ
+	// Call AI
 	fmt.Printf("Starting AI request...\n")
 	content, err := s.Client.CreateChatCompletion(ctx, messages, true)
 	if err != nil {
-		fmt.Printf("AI request failed: %v\n", err)
+		fmt.Printf("AI REQUEST FAILED when regenerating plan: %v\n", err)
 		return nil, NewServiceError(
 			http.StatusInternalServerError,
 			"AI request failed",
@@ -638,7 +643,7 @@ IMPORTANT: Create EXACTLY %d different workouts. Follow ALL user requirements fr
 		}
 	}
 
-	// Заполняем отсутствующие поля значениями по умолчанию
+	// Fill missing fields with default values
 	for i := range generatedData.Workouts {
 		if generatedData.Workouts[i].Status == "" {
 			generatedData.Workouts[i].Status = "planned"
@@ -650,18 +655,18 @@ IMPORTANT: Create EXACTLY %d different workouts. Follow ALL user requirements fr
 		}
 	}
 
-	// Обновляем короткий план
+	// Update short plan
 	now := time.Now()
 	currentShortPlan.Title = generatedData.Title
 	currentShortPlan.BaseWorkouts = generatedData.Workouts
 	currentShortPlan.UpdatedAt = now
 
-	// Сохраняем обновленный короткий план
+	// Save updated short plan
 	if err := s.MongoDBRepo.SaveShortPlan(ctx, currentShortPlan); err != nil {
 		fmt.Printf("Failed to save updated short plan: %v\n", err)
 	}
 
-	// Создаем полный план
+	// Create full plan
 	updatedPlan := &models.WorkoutPlan{
 		UserID:    userID,
 		Title:     generatedData.Title,
@@ -679,7 +684,7 @@ IMPORTANT: Create EXACTLY %d different workouts. Follow ALL user requirements fr
 	// Replace workouts with full schedule
 	updatedPlan.Workouts = fullSchedule
 
-	// Сохраняем обновленный план
+	// Save updated plan
 	if err := s.MongoDBRepo.SaveWorkoutPlan(ctx, updatedPlan); err != nil {
 		return nil, NewServiceError(
 			http.StatusInternalServerError,
@@ -760,6 +765,7 @@ func (s *AIService) GenerateMotivationalMessage(ctx context.Context) (string, er
 
 	response, err := s.Client.CreateChatCompletion(ctx, messages, false)
 	if err != nil {
+		fmt.Printf("ERROR: AI request failed in GenerateMotivationalMessage: %v\n", err)
 		return "You're crushing it! Keep up the excellent work!", nil
 	}
 
