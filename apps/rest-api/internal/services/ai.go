@@ -277,6 +277,7 @@ func (s *AIService) Chat(ctx context.Context, message string) (string, error) {
 	// Call AI
 	response, err := s.Client.CreateChatCompletion(ctx, messages, false)
 	if err != nil {
+		fmt.Println(err)
 		return "", NewServiceError(
 			http.StatusInternalServerError,
 			"AI request failed",
@@ -731,6 +732,10 @@ func (s *AIService) GetUserProgress(ctx context.Context) (*models.UserProgress, 
 	}
 
 	return s.MongoDBRepo.GetUserProgress(ctx, userID)
+}
+
+func (s *AIService) GetRating(ctx context.Context) ([]models.UserRating, error) {
+	return s.MongoDBRepo.GetRating(ctx)
 }
 
 func (s *AIService) GenerateMotivationalMessage(ctx context.Context) (string, error) {
