@@ -25,7 +25,6 @@ jobs:
 
       - name: Build web
         run: |
-          flutter create . --platforms web
           flutter build web --release --base-href /Trivia-Health/
         working-directory: apps/android-app
 
